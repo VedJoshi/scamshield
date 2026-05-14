@@ -44,16 +44,16 @@ export function AnalysisWorkspace() {
       <section className="hero-grid">
         <div className="hero-copy">
           <p className="eyebrow">ScamShield MVP</p>
-          <h1>One working defense agent today. A full anti-scam platform next.</h1>
+          <h1>Three specialized agents. One anti-scam platform.</h1>
           <p className="hero-lead">
-            ScamShield starts with LinkGuardian: a Vietnam-focused AI workflow that
-            checks suspicious links, seller pages, listings, and payment instructions
-            before money moves.
+            LinkGuardian checks links and payments. VoiceShield flags suspicious calls
+            and messages. ShopScan scores e-commerce seller trust. All Vietnam-focused,
+            all AI-backed.
           </p>
           <div className="hero-metrics">
             <article>
               <strong>Works now</strong>
-              <span>Real OpenAI-backed analysis and saved case history</span>
+              <span>Three real agents: LinkGuardian, VoiceShield, and ShopScan</span>
             </article>
             <article>
               <strong>Can make money</strong>

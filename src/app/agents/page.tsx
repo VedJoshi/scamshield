@@ -5,11 +5,10 @@ export default function AgentsPage() {
     <main className="page-shell page-narrow">
       <section className="panel panel-strong">
         <p className="eyebrow">Platform roadmap</p>
-        <h1>One live agent now, four monetizable modules queued behind it.</h1>
+        <h1>Three live agents now, with platform modules queued behind them.</h1>
         <p>
-          LinkGuardian is the shipping wedge product. The other modules are scaffolded so
-          the product already reads like a platform, but only the live agent is wired into
-          the analysis flow.
+          LinkGuardian, VoiceShield, and ShopScan are wired into the analysis flow.
+          FraudRadar and ReportSynth remain scaffolded as the next platform modules.
         </p>
       </section>
       <AgentCardList />

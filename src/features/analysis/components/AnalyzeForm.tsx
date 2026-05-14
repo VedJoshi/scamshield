@@ -8,6 +8,8 @@ const inputTypeLabels: Record<AnalysisInputType, string> = {
   payment_text: "Payment text",
   seller_text: "Seller text",
   listing_text: "Listing text",
+  voice_transcript: "Voice / SMS",
+  shop_profile: "Shop profile",
 };
 
 interface AnalyzeFormProps {
@@ -43,8 +45,7 @@ export function AnalyzeForm({
         <p className="eyebrow">Live MVP</p>
         <h2>Check a suspicious link or payment request before you pay.</h2>
         <p>
-          The MVP runs one real agent today: LinkGuardian. Seller text, listings, and
-          payment instructions all flow through the same analysis engine.
+          Select an input type - each routes to a specialized ScamShield agent.
         </p>
       </div>
 
@@ -87,12 +88,8 @@ export function AnalyzeForm({
           id="rawInput"
           value={rawInput}
           onChange={(event) => onRawInputChange(event.target.value)}
-          placeholder={
-            isUrl
-              ? "https://example-login-secure-check.com"
-              : "Paste seller text, listing details, or payment-page instructions here."
-          }
-          rows={isUrl ? 4 : 10}
+          placeholder={getPlaceholder(inputType)}
+          rows={getRows(inputType)}
         />
 
         <button className="primary-button" type="submit" disabled={isLoading || rawInput.trim().length < 8}>
@@ -115,4 +112,29 @@ export function AnalyzeForm({
       </div>
     </section>
   );
+}
+
+function getPlaceholder(inputType: AnalysisInputType) {
+  switch (inputType) {
+    case "url":
+      return "https://example-login-secure-check.com";
+    case "voice_transcript":
+      return "Paste a suspicious SMS, WhatsApp message, or call transcript here.";
+    case "shop_profile":
+      return "Paste a Shopee/TikTok Shop/Lazada seller profile URL or copy-paste the seller page text.";
+    default:
+      return "Paste seller text, listing details, or payment-page instructions here.";
+  }
+}
+
+function getRows(inputType: AnalysisInputType) {
+  if (inputType === "url") {
+    return 4;
+  }
+
+  if (inputType === "voice_transcript") {
+    return 12;
+  }
+
+  return 10;
 }

@@ -41,4 +41,36 @@ export const exampleInputs: ExampleInput[] = [
       "100% authentic AirPods Pro, flash sale 390,000 VND today only. No returns. Message us for a private checkout link because the marketplace fee is too high.",
     note: "Unrealistic pricing and private checkout diversion.",
   },
+  {
+    id: "vietcombank-otp-sms",
+    title: "Fake Vietcombank OTP SMS",
+    inputType: "voice_transcript",
+    rawInput:
+      "VIETCOMBANK: Your account will be locked in 15 minutes due to unusual access. Read the OTP we just sent to cancel the freeze, or transfer funds to our safe account for verification.",
+    note: "Bank impersonation, urgency, OTP pressure, and a safe-account request.",
+  },
+  {
+    id: "government-fine-notice",
+    title: "Fake government fine notice",
+    inputType: "voice_transcript",
+    rawInput:
+      "This is the traffic police department. You have an unpaid violation and must pay 3,500,000 VND today to avoid prosecution. Do not visit the office; send payment to this personal account and keep the case private.",
+    note: "Government impersonation plus pressure to pay outside official channels.",
+  },
+  {
+    id: "apple-offical-shop",
+    title: "Cloned brand shop profile",
+    inputType: "shop_profile",
+    rawInput:
+      "Shop name: Apple Offical Store VN. Account created this week. 100% 5-star reviews: 'good product good seller' repeated across all reviews. iPhone 15 Pro Max new sealed for 8,900,000 VND. Inbox Zalo for bank transfer discount. No returns after payment.",
+    note: "Brand-name mimicry, new account, generic reviews, and off-platform payment.",
+  },
+  {
+    id: "too-cheap-marketplace-listing",
+    title: "Too-good marketplace seller",
+    inputType: "shop_profile",
+    rawInput:
+      "TikTok Shop seller profile: Samsung Viet Nam Clearance. Galaxy S24 Ultra listed at 5,200,000 VND, limited stock today only. Seller asks buyers to message Telegram for private checkout because platform payment is temporarily unavailable.",
+    note: "Unrealistic pricing and private checkout diversion.",
+  },
 ];
