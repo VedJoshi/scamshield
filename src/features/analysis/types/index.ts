@@ -7,9 +7,15 @@ export type {
   ScamSignal,
 } from "@/agents/core/types";
 
+import type { AnalysisResult } from "@/agents/core/types";
+
 export interface SavedCase {
   id: string;
   createdAt: string;
   request: import("@/agents/core/types").AnalysisRequest;
-  result: import("@/agents/core/types").AnalysisResult;
+  result: AnalysisResult;
+}
+
+export interface AudioAnalysisResult extends AnalysisResult {
+  transcript: string;
 }

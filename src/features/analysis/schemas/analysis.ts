@@ -8,13 +8,60 @@ export const analysisInputTypeSchema = z.enum([
   "voice_transcript",
   "shop_profile",
   "qr_image",
+  "image_upload",
 ]);
 
-export const analysisRequestSchema = z.object({
-  inputType: analysisInputTypeSchema,
-  rawInput: z.string().trim().min(8).max(6000),
-  locale: z.enum(["vi-VN", "en-US"]),
-});
+export const analysisRequestSchema = z
+  .object({
+    inputType: analysisInputTypeSchema,
+    rawInput: z.string().trim(),
+    locale: z.enum(["vi-VN", "en-US"]),
+  })
+  .superRefine((data, ctx) => {
+    if (data.inputType === "image_upload") {
+      if (data.rawInput.length < 8) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.too_small,
+          minimum: 8,
+          type: "string",
+          inclusive: true,
+          path: ["rawInput"],
+          message: "Image data is too small.",
+        });
+      }
+      if (data.rawInput.length > 500000) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.too_big,
+          maximum: 500000,
+          type: "string",
+          inclusive: true,
+          path: ["rawInput"],
+          message: "Image data exceeds 500KB limit.",
+        });
+      }
+    } else {
+      if (data.rawInput.length < 8) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.too_small,
+          minimum: 8,
+          type: "string",
+          inclusive: true,
+          path: ["rawInput"],
+          message: "Input must be at least 8 characters.",
+        });
+      }
+      if (data.rawInput.length > 6000) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.too_big,
+          maximum: 6000,
+          type: "string",
+          inclusive: true,
+          path: ["rawInput"],
+          message: "Input must be under 6000 characters.",
+        });
+      }
+    }
+  });
 
 export const scamSignalSchema = z.object({
   id: z.string().min(1),

@@ -370,6 +370,228 @@ textarea {
   font-weight: 700;
 }
 
+.image-uploader {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.image-dropzone {
+  display: grid;
+  gap: 0.35rem;
+  border: 2px dashed rgba(17, 60, 47, 0.42);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.58);
+  padding: 2rem 1.2rem;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.image-dropzone:hover {
+  border-color: rgba(17, 60, 47, 0.65);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.image-dropzone span {
+  font-family: "Arial Black", "Arial Narrow", sans-serif;
+  font-size: 1.05rem;
+}
+
+.image-dropzone small {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.image-preview-shell {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.image-preview {
+  max-height: 200px;
+  width: 100%;
+  object-fit: contain;
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.image-loading {
+  display: grid;
+  gap: 0.8rem;
+  text-align: center;
+}
+
+.image-loading p {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  margin: 0 auto;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.audio-uploader {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.audio-dropzone {
+  display: grid;
+  gap: 0.35rem;
+  border: 2px dashed rgba(17, 60, 47, 0.42);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.58);
+  padding: 2rem 1.2rem;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.audio-dropzone:hover {
+  border-color: rgba(17, 60, 47, 0.65);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.audio-dropzone span {
+  font-family: "Arial Black", "Arial Narrow", sans-serif;
+  font-size: 1.05rem;
+}
+
+.audio-dropzone small {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.audio-file-info {
+  display: grid;
+  gap: 0.8rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.audio-file-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.audio-file-details span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.audio-loading {
+  display: grid;
+  gap: 1rem;
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.audio-loading p {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.waveform-bars {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 6px;
+  height: 40px;
+}
+
+.waveform-bar {
+  width: 6px;
+  background: var(--accent);
+  border-radius: 3px;
+  animation: waveform 1.2s ease-in-out infinite;
+}
+
+.waveform-bar:nth-child(1) {
+  animation-delay: 0s;
+  height: 16px;
+}
+
+.waveform-bar:nth-child(2) {
+  animation-delay: 0.15s;
+  height: 28px;
+}
+
+.waveform-bar:nth-child(3) {
+  animation-delay: 0.3s;
+  height: 36px;
+}
+
+.waveform-bar:nth-child(4) {
+  animation-delay: 0.45s;
+  height: 28px;
+}
+
+.waveform-bar:nth-child(5) {
+  animation-delay: 0.6s;
+  height: 16px;
+}
+
+@keyframes waveform {
+  0%,
+  100% {
+    transform: scaleY(0.4);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+.transcript-toggle {
+  margin-top: 0.8rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.transcript-toggle summary {
+  cursor: pointer;
+  font-family: "Arial Black", "Arial Narrow", sans-serif;
+  font-size: 0.95rem;
+  color: var(--accent);
+}
+
+.transcript-toggle p {
+  margin-top: 0.6rem;
+  white-space: pre-wrap;
+  line-height: 1.6;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.transcript-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-style: italic;
+  margin-top: 0.4rem;
+}
+
 .score-shell {
   display: flex;
   justify-content: space-between;

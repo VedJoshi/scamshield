@@ -14,6 +14,21 @@ const severePatterns = [
   /down payment/i,
   /wire/i,
   /qr/i,
+  /khẩn cấp/i,
+  /ngân hàng/i,
+  /xác minh/i,
+  /chuyển khoản/i,
+  /mã OTP/i,
+  /tài khoản an toàn/i,
+  /khóa tài khoản/i,
+  /trúng thưởng/i,
+  /giả mạo/i,
+  /công an/i,
+  /viện kiểm sát/i,
+  /hải quan/i,
+  /tiền đặt cọc/i,
+  /phí xử lý/i,
+  /nạp tiền/i,
 ];
 
 export function computeRisk(signals: ScamSignal[]) {

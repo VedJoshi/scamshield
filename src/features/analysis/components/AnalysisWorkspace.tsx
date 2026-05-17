@@ -3,24 +3,27 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import type { AnalysisInputType } from "@/agents/core/types";
+import type { AnalysisResult } from "@/agents/core/types";
 import { AnalyzeForm } from "@/features/analysis/components/AnalyzeForm";
 import { AnalysisResultPanel } from "@/features/analysis/components/AnalysisResultPanel";
 import { useAnalysis } from "@/features/analysis/hooks/useAnalysis";
 import { useCaseHistory } from "@/features/analysis/hooks/useCaseHistory";
 import { exampleInputs } from "@/features/analysis/services/example-inputs";
-import type { SavedCase } from "@/features/analysis/types";
+import type { AudioAnalysisResult, SavedCase } from "@/features/analysis/types";
+
+type FormInputType = import("@/agents/core/types").AnalysisInputType | "audio_upload";
 
 export function AnalysisWorkspace() {
-  const [inputType, setInputType] = useState<AnalysisInputType>("url");
+  const [inputType, setInputType] = useState<FormInputType>("url");
   const [rawInput, setRawInput] = useState(exampleInputs[0]?.rawInput ?? "");
   const [locale, setLocale] = useState<"vi-VN" | "en-US">("en-US");
   const [lastSavedCaseId, setLastSavedCaseId] = useState<SavedCase["id"] | null>(null);
-  const { analyze, error, isLoading, result } = useAnalysis();
+  const [audioResult, setAudioResult] = useState<AudioAnalysisResult | null>(null);
+  const { analyze, error, isLoading, lastRequest, result, setError, setLastRequest, setResult } = useAnalysis();
   const { addCase } = useCaseHistory();
 
   function handleSave() {
-    if (!result) {
+    if (!result || !lastRequest) {
       return;
     }
 
@@ -28,15 +31,53 @@ export function AnalysisWorkspace() {
       id: crypto.randomUUID(),
       createdAt: new Date().toISOString(),
       request: {
-        inputType,
-        rawInput,
-        locale,
+        inputType: lastRequest.inputType,
+        rawInput: lastRequest.rawInput,
+        locale: lastRequest.locale,
       },
       result,
     };
 
     addCase(nextCase);
     setLastSavedCaseId(nextCase.id);
+  }
+
+  function handleImageResult(imageResult: AnalysisResult) {
+    setLastSavedCaseId(null);
+    setAudioResult(null);
+    setError(null);
+    setResult(imageResult);
+    setLastRequest({
+      inputType: "image_upload",
+      rawInput: "[image upload]",
+      locale,
+    });
+  }
+
+  function handleImageError(msg: string) {
+    setLastSavedCaseId(null);
+    setAudioResult(null);
+    setError(msg);
+    setResult(null);
+  }
+
+  function handleAudioResult(aResult: AudioAnalysisResult) {
+    setLastSavedCaseId(null);
+    setError(null);
+    setAudioResult(aResult);
+    setResult(aResult);
+    setLastRequest({
+      inputType: "voice_transcript",
+      rawInput: aResult.transcript,
+      locale,
+    });
+  }
+
+  function handleAudioError(msg: string) {
+    setLastSavedCaseId(null);
+    setAudioResult(null);
+    setError(msg);
+    setResult(null);
   }
 
   return (
@@ -73,6 +114,14 @@ export function AnalysisWorkspace() {
           onSave={handleSave}
           lastSavedCaseId={lastSavedCaseId}
         />
+
+        {audioResult ? (
+          <details className="transcript-toggle">
+            <summary>View transcript</summary>
+            <p>{audioResult.transcript}</p>
+            <p className="transcript-note">Transcribed by Whisper AI — verify before sharing.</p>
+          </details>
+        ) : null}
       </section>
 
       <AnalyzeForm
@@ -83,14 +132,17 @@ export function AnalysisWorkspace() {
         onInputTypeChange={(value) => {
           setInputType(value);
           setLastSavedCaseId(null);
+          setAudioResult(null);
         }}
         onRawInputChange={(value) => {
           setRawInput(value);
           setLastSavedCaseId(null);
+          setAudioResult(null);
         }}
         onLocaleChange={(value) => setLocale(value)}
         onSubmit={(request) => {
           setLastSavedCaseId(null);
+          setAudioResult(null);
           void analyze(request);
         }}
         examples={exampleInputs}
@@ -98,7 +150,12 @@ export function AnalysisWorkspace() {
           setInputType(example.inputType);
           setRawInput(example.rawInput);
           setLastSavedCaseId(null);
+          setAudioResult(null);
         }}
+        onImageResult={handleImageResult}
+        onImageError={handleImageError}
+        onAudioResult={handleAudioResult}
+        onAudioError={handleAudioError}
       />
     </main>
   );

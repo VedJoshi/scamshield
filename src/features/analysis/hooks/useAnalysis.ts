@@ -6,6 +6,7 @@ import type { AnalysisRequest, AnalysisResult } from "@/agents/core/types";
 
 export function useAnalysis() {
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [lastRequest, setLastRequest] = useState<AnalysisRequest | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -30,6 +31,7 @@ export function useAnalysis() {
 
       startTransition(() => {
         setResult(payload);
+        setLastRequest(input);
       });
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Analysis failed.");
@@ -42,7 +44,10 @@ export function useAnalysis() {
     analyze,
     error,
     isLoading,
+    lastRequest,
     result,
+    setError,
+    setLastRequest,
     setResult,
   };
 }
