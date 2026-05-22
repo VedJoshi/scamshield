@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { AudioAnalysisResult } from "@/features/analysis/types";
 
@@ -22,8 +22,35 @@ export function useAudioAnalysis() {
   });
 
   const stageTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
-  function analyzeAudio(file: File, locale: "en-US" | "vi-VN") {
+  const dispose = useCallback(() => {
+    if (stageTimerRef.current) {
+      clearTimeout(stageTimerRef.current);
+      stageTimerRef.current = null;
+    }
+
+    abortRef.current?.abort();
+    abortRef.current = null;
+  }, []);
+
+  const reset = useCallback(() => {
+    dispose();
+    setState({
+      isLoading: false,
+      result: null,
+      error: null,
+      transcribingStage: false,
+      analyzingStage: false,
+    });
+  }, [dispose]);
+
+  const analyzeAudio = useCallback((file: File, locale: "en-US" | "vi-VN") => {
+    reset();
+
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setState({
       isLoading: true,
       result: null,
@@ -47,6 +74,7 @@ export function useAudioAnalysis() {
     fetch("/api/analyze-audio", {
       method: "POST",
       body: form,
+      signal: controller.signal,
     })
       .then(async (response) => {
         const payload = await response.json();
@@ -55,8 +83,13 @@ export function useAudioAnalysis() {
           throw new Error(payload.error ?? "Audio analysis failed.");
         }
 
+        if (controller.signal.aborted) {
+          return;
+        }
+
         if (stageTimerRef.current) {
           clearTimeout(stageTimerRef.current);
+          stageTimerRef.current = null;
         }
 
         setState({
@@ -68,8 +101,13 @@ export function useAudioAnalysis() {
         });
       })
       .catch((caught) => {
+        if (controller.signal.aborted) {
+          return;
+        }
+
         if (stageTimerRef.current) {
           clearTimeout(stageTimerRef.current);
+          stageTimerRef.current = null;
         }
 
         setState({
@@ -79,29 +117,17 @@ export function useAudioAnalysis() {
           transcribingStage: false,
           analyzingStage: false,
         });
+      })
+      .finally(() => {
+        if (abortRef.current === controller) {
+          abortRef.current = null;
+        }
       });
-  }
-
-  function reset() {
-    if (stageTimerRef.current) {
-      clearTimeout(stageTimerRef.current);
-    }
-    setState({
-      isLoading: false,
-      result: null,
-      error: null,
-      transcribingStage: false,
-      analyzingStage: false,
-    });
-  }
+  }, [reset]);
 
   useEffect(() => {
-    return () => {
-      if (stageTimerRef.current) {
-        clearTimeout(stageTimerRef.current);
-      }
-    };
-  }, []);
+    return dispose;
+  }, [dispose]);
 
   return {
     analyzeAudio,

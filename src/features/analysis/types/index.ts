@@ -1,3 +1,5 @@
+import type { AnalysisInputType, AnalysisRequest, AnalysisResult } from "@/agents/core/types";
+
 export type {
   AnalysisInputType,
   AnalysisRequest,
@@ -7,12 +9,18 @@ export type {
   ScamSignal,
 } from "@/agents/core/types";
 
-import type { AnalysisResult } from "@/agents/core/types";
+export type FormInputType = AnalysisInputType | "audio_upload";
+
+export interface QueuedUpload {
+  id: string;
+  kind: "image" | "audio";
+  file: File;
+}
 
 export interface SavedCase {
   id: string;
   createdAt: string;
-  request: import("@/agents/core/types").AnalysisRequest;
+  request: AnalysisRequest;
   result: AnalysisResult;
 }
 

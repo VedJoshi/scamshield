@@ -12,8 +12,8 @@ export function CaseHistoryClientPage() {
         <p className="eyebrow">Case history</p>
         <h1>Saved mentor-demo cases and recent checks.</h1>
         <p>
-          Local history is enough for the MVP. Later this store can move to a shared
-          backend without changing the analyzer contract.
+          Saved checks persist through the server-backed case store when Supabase is configured,
+          with local fallback during development.
         </p>
       </section>
       <CaseHistoryList cases={cases} />

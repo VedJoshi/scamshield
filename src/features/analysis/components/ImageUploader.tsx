@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import type { AnalysisResult } from "@/agents/core/types";
 import { useImageAnalysis } from "@/features/analysis/hooks/useImageAnalysis";
@@ -9,37 +9,65 @@ interface ImageUploaderProps {
   locale: "en-US" | "vi-VN";
   onResult: (result: AnalysisResult) => void;
   onError: (msg: string) => void;
+  queuedFile?: {
+    id: string;
+    file: File;
+  } | null;
 }
 
-export function ImageUploader({ locale, onResult, onError }: ImageUploaderProps) {
+const MAX_IMAGE_FILE_SIZE = 8 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
+
+export function ImageUploader({ locale, onResult, onError, queuedFile }: ImageUploaderProps) {
   const { analyzeImage, cleanup, isLoading, result, error, preview } = useImageAnalysis();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const handledQueuedFileIdRef = useRef<string | null>(null);
+  const onResultRef = useRef(onResult);
+  const onErrorRef = useRef(onError);
+
+  onResultRef.current = onResult;
+  onErrorRef.current = onError;
 
   useEffect(() => {
     if (result) {
-      onResult(result);
+      onResultRef.current(result);
     }
-  }, [result, onResult]);
+  }, [result]);
 
   useEffect(() => {
     if (error) {
-      onError(error);
+      onErrorRef.current(error);
     }
-  }, [error, onError]);
+  }, [error]);
+
+  const handleFile = useCallback((file: File | undefined) => {
+    if (!file) {
+      return false;
+    }
+
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      cleanup();
+      onErrorRef.current("Please choose an image file (PNG, JPEG, WebP, GIF).");
+      return false;
+    }
+
+    if (file.size > MAX_IMAGE_FILE_SIZE) {
+      cleanup();
+      onErrorRef.current("Image must be under 8MB.");
+      return false;
+    }
+
+    onErrorRef.current("");
+    analyzeImage(file, locale);
+    return true;
+  }, [analyzeImage, cleanup, locale]);
 
   useEffect(() => {
-    return () => {
-      cleanup();
-    };
-  }, [cleanup]);
-
-  function handleFile(file: File | undefined) {
-    if (!file) {
-      return;
+    if (queuedFile && queuedFile.id !== handledQueuedFileIdRef.current) {
+      handledQueuedFileIdRef.current = queuedFile.id;
+      handleFile(queuedFile.file);
     }
-    onError("");
-    analyzeImage(file, locale);
-  }
+  }, [handleFile, queuedFile]);
 
   function handleDrop(event: React.DragEvent<HTMLDivElement>) {
     event.preventDefault();
@@ -62,6 +90,15 @@ export function ImageUploader({ locale, onResult, onError }: ImageUploaderProps)
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onClick={() => fileInputRef.current?.click()}
+        role="button"
+        tabIndex={0}
+        aria-label="Upload screenshot for scam analysis"
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            fileInputRef.current?.click();
+          }
+        }}
       >
         <span>Drop a screenshot here, or click to upload</span>
         <small>WhatsApp message · Bank SMS · Shopee listing · Payment page</small>

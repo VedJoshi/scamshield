@@ -13,6 +13,8 @@ export function useAnalysis() {
   async function analyze(input: AnalysisRequest) {
     setIsLoading(true);
     setError(null);
+    setResult(null);
+    setLastRequest(null);
 
     try {
       const response = await fetch("/api/analyze", {

@@ -3,6 +3,7 @@ import OpenAI from "openai";
 
 import { aiAnalysisResponseSchema } from "@/features/analysis/schemas/analysis";
 import { computeRisk } from "@/features/analysis/services/scoring.service";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -44,6 +45,17 @@ const MAX_FILE_SIZE = 8 * 1024 * 1024;
 
 export async function POST(request: Request) {
   try {
+    const rateLimitResponse = checkRateLimit(request, {
+      keyPrefix: "analyze-image",
+      limit: 10,
+      windowMs: 60_000,
+      message: "Rate limit exceeded. Max 10 image analyses per minute.",
+    });
+
+    if (rateLimitResponse) {
+      return rateLimitResponse;
+    }
+
     const form = await request.formData();
     const file = form.get("file") as File | null;
     const locale = (form.get("locale") as string) ?? "en-US";
