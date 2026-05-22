@@ -3,10 +3,9 @@ import { ZodError, z } from "zod";
 
 import type { AnalysisInputType } from "@/agents/core/types";
 import { getAnalyzerForInput } from "@/agents/core/registry";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
-
-const rateMap = new Map<string, { count: number; windowStart: number }>();
 
 const publicCheckSchema = z.object({
   input_type: z.enum([
@@ -23,7 +22,12 @@ const publicCheckSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const rateLimitResponse = checkRateLimit(request);
+    const rateLimitResponse = checkRateLimit(request, {
+      keyPrefix: "api-v1-check",
+      limit: 20,
+      windowMs: 60_000,
+      message: "Rate limit exceeded. Max 20 requests per minute.",
+    });
 
     if (rateLimitResponse) {
       return rateLimitResponse;
@@ -58,26 +62,4 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ error: "Analysis failed." }, { status: 500 });
   }
-}
-
-function checkRateLimit(request: Request) {
-  const ip = request.headers.get("x-forwarded-for") ?? "unknown";
-  const now = Date.now();
-  const entry = rateMap.get(ip) ?? { count: 0, windowStart: now };
-
-  if (now - entry.windowStart > 60_000) {
-    entry.count = 0;
-    entry.windowStart = now;
-  }
-
-  if (entry.count >= 20) {
-    return NextResponse.json(
-      { error: "Rate limit exceeded. Max 20 requests per minute." },
-      { status: 429 },
-    );
-  }
-
-  entry.count += 1;
-  rateMap.set(ip, entry);
-  return null;
 }

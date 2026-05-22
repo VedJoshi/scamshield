@@ -6,12 +6,11 @@ import { useState } from "react";
 import type { AnalysisResult } from "@/agents/core/types";
 import { AnalyzeForm } from "@/features/analysis/components/AnalyzeForm";
 import { AnalysisResultPanel } from "@/features/analysis/components/AnalysisResultPanel";
+import { SmartDropZone } from "@/features/analysis/components/SmartDropZone";
 import { useAnalysis } from "@/features/analysis/hooks/useAnalysis";
 import { useCaseHistory } from "@/features/analysis/hooks/useCaseHistory";
 import { exampleInputs } from "@/features/analysis/services/example-inputs";
-import type { AudioAnalysisResult, SavedCase } from "@/features/analysis/types";
-
-type FormInputType = import("@/agents/core/types").AnalysisInputType | "audio_upload";
+import type { AudioAnalysisResult, FormInputType, QueuedUpload, SavedCase } from "@/features/analysis/types";
 
 export function AnalysisWorkspace() {
   const [inputType, setInputType] = useState<FormInputType>("url");
@@ -19,6 +18,7 @@ export function AnalysisWorkspace() {
   const [locale, setLocale] = useState<"vi-VN" | "en-US">("en-US");
   const [lastSavedCaseId, setLastSavedCaseId] = useState<SavedCase["id"] | null>(null);
   const [audioResult, setAudioResult] = useState<AudioAnalysisResult | null>(null);
+  const [queuedUpload, setQueuedUpload] = useState<QueuedUpload | null>(null);
   const { analyze, error, isLoading, lastRequest, result, setError, setLastRequest, setResult } = useAnalysis();
   const { addCase } = useCaseHistory();
 
@@ -45,6 +45,7 @@ export function AnalysisWorkspace() {
   function handleImageResult(imageResult: AnalysisResult) {
     setLastSavedCaseId(null);
     setAudioResult(null);
+    setQueuedUpload(null);
     setError(null);
     setResult(imageResult);
     setLastRequest({
@@ -57,13 +58,16 @@ export function AnalysisWorkspace() {
   function handleImageError(msg: string) {
     setLastSavedCaseId(null);
     setAudioResult(null);
+    setQueuedUpload(null);
     setError(msg);
     setResult(null);
+    setLastRequest(null);
   }
 
   function handleAudioResult(aResult: AudioAnalysisResult) {
     setLastSavedCaseId(null);
     setError(null);
+    setQueuedUpload(null);
     setAudioResult(aResult);
     setResult(aResult);
     setLastRequest({
@@ -76,8 +80,34 @@ export function AnalysisWorkspace() {
   function handleAudioError(msg: string) {
     setLastSavedCaseId(null);
     setAudioResult(null);
+    setQueuedUpload(null);
     setError(msg);
     setResult(null);
+    setLastRequest(null);
+  }
+
+  function queueDroppedUpload(kind: QueuedUpload["kind"], file: File) {
+    setInputType(kind === "image" ? "image_upload" : "audio_upload");
+    setRawInput("");
+    setLastSavedCaseId(null);
+    setAudioResult(null);
+    setResult(null);
+    setLastRequest(null);
+    setError(null);
+    setQueuedUpload({
+      id: crypto.randomUUID(),
+      kind,
+      file,
+    });
+  }
+
+  function handleUnknownDrop(file: File) {
+    setLastSavedCaseId(null);
+    setAudioResult(null);
+    setResult(null);
+    setLastRequest(null);
+    setQueuedUpload(null);
+    setError(`Unsupported file type: ${file.name}. Try a screenshot, QR image, or audio file.`);
   }
 
   return (
@@ -124,39 +154,50 @@ export function AnalysisWorkspace() {
         ) : null}
       </section>
 
-      <AnalyzeForm
-        inputType={inputType}
-        rawInput={rawInput}
-        locale={locale}
-        isLoading={isLoading}
-        onInputTypeChange={(value) => {
-          setInputType(value);
-          setLastSavedCaseId(null);
-          setAudioResult(null);
-        }}
-        onRawInputChange={(value) => {
-          setRawInput(value);
-          setLastSavedCaseId(null);
-          setAudioResult(null);
-        }}
-        onLocaleChange={(value) => setLocale(value)}
-        onSubmit={(request) => {
-          setLastSavedCaseId(null);
-          setAudioResult(null);
-          void analyze(request);
-        }}
-        examples={exampleInputs}
-        onLoadExample={(example) => {
-          setInputType(example.inputType);
-          setRawInput(example.rawInput);
-          setLastSavedCaseId(null);
-          setAudioResult(null);
-        }}
-        onImageResult={handleImageResult}
-        onImageError={handleImageError}
-        onAudioResult={handleAudioResult}
-        onAudioError={handleAudioError}
-      />
+      <SmartDropZone
+        onImageDrop={(file) => queueDroppedUpload("image", file)}
+        onAudioDrop={(file) => queueDroppedUpload("audio", file)}
+        onUnknown={handleUnknownDrop}
+      >
+        <AnalyzeForm
+          inputType={inputType}
+          rawInput={rawInput}
+          locale={locale}
+          isLoading={isLoading}
+          onInputTypeChange={(value) => {
+            setInputType(value);
+            setQueuedUpload(null);
+            setLastSavedCaseId(null);
+            setAudioResult(null);
+          }}
+          onRawInputChange={(value) => {
+            setRawInput(value);
+            setQueuedUpload(null);
+            setLastSavedCaseId(null);
+            setAudioResult(null);
+          }}
+          onLocaleChange={(value) => setLocale(value)}
+          onSubmit={(request) => {
+            setQueuedUpload(null);
+            setLastSavedCaseId(null);
+            setAudioResult(null);
+            void analyze(request);
+          }}
+          examples={exampleInputs}
+          onLoadExample={(example) => {
+            setInputType(example.inputType);
+            setRawInput(example.rawInput);
+            setQueuedUpload(null);
+            setLastSavedCaseId(null);
+            setAudioResult(null);
+          }}
+          onImageResult={handleImageResult}
+          onImageError={handleImageError}
+          onAudioResult={handleAudioResult}
+          onAudioError={handleAudioError}
+          queuedUpload={queuedUpload}
+        />
+      </SmartDropZone>
     </main>
   );
 }

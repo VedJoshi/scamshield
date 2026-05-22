@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.106.1",
     "next": "^15.3.2",
     "openai": "^4.104.0",
     "qr-scanner": "^1.4.2",

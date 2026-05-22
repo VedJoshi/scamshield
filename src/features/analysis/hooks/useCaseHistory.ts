@@ -9,11 +9,12 @@ export function useCaseHistory() {
   const [cases, setCases] = useState<SavedCase[]>([]);
 
   useEffect(() => {
-    setCases(loadSavedCases());
+    void loadSavedCases().then(setCases);
   }, []);
 
   function addCase(nextCase: SavedCase) {
-    setCases(saveCase(nextCase));
+    setCases((current) => [nextCase, ...current.filter((entry) => entry.id !== nextCase.id)].slice(0, 50));
+    void saveCase(nextCase).then(setCases);
   }
 
   return {

@@ -13,6 +13,7 @@ export default function AgentsPage() {
         </p>
         <div className="hero-links">
           <Link href="/api-docs">View API docs -&gt;</Link>
+          <Link href="/dashboard">View dashboard -&gt;</Link>
         </div>
       </section>
       <AgentCardList />

@@ -1,4 +1,5 @@
 import { analyzerRegistry } from "@/agents/core/registry";
+import { VoiceShieldPreview } from "@/features/analysis/components/VoiceShieldPreview";
 
 export function AgentCardList() {
   return (
@@ -15,6 +16,7 @@ export function AgentCardList() {
           <p>{agent.description}</p>
           <strong>Why it can make money</strong>
           <p>{agent.monetizationAngle}</p>
+          {agent.id === "voice-shield" ? <VoiceShieldPreview /> : null}
         </article>
       ))}
     </section>

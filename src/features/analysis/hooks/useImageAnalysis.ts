@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { AnalysisResult } from "@/agents/core/types";
 
@@ -19,8 +19,41 @@ export function useImageAnalysis() {
     preview: null,
   });
 
-  function analyzeImage(file: File, locale: "en-US" | "vi-VN") {
+  const abortRef = useRef<AbortController | null>(null);
+  const previewRef = useRef<string | null>(null);
+
+  const revokePreview = useCallback(() => {
+    if (previewRef.current) {
+      URL.revokeObjectURL(previewRef.current);
+      previewRef.current = null;
+    }
+  }, []);
+
+  const dispose = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    revokePreview();
+  }, [revokePreview]);
+
+  const cleanup = useCallback(() => {
+    dispose();
+    setState({
+      isLoading: false,
+      result: null,
+      error: null,
+      preview: null,
+    });
+  }, [dispose]);
+
+  const analyzeImage = useCallback((file: File, locale: "en-US" | "vi-VN") => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    revokePreview();
+
     const preview = URL.createObjectURL(file);
+    const controller = new AbortController();
+    previewRef.current = preview;
+    abortRef.current = controller;
 
     setState({
       isLoading: true,
@@ -36,12 +69,17 @@ export function useImageAnalysis() {
     fetch("/api/analyze-image", {
       method: "POST",
       body: form,
+      signal: controller.signal,
     })
       .then(async (response) => {
         const payload = await response.json();
 
         if (!response.ok) {
           throw new Error(payload.error ?? "Image analysis failed.");
+        }
+
+        if (controller.signal.aborted) {
+          return;
         }
 
         setState((prev) => ({
@@ -51,25 +89,24 @@ export function useImageAnalysis() {
         }));
       })
       .catch((caught) => {
+        if (controller.signal.aborted) {
+          return;
+        }
+
         setState((prev) => ({
           ...prev,
           isLoading: false,
           error: caught instanceof Error ? caught.message : "Image analysis failed.",
         }));
+      })
+      .finally(() => {
+        if (abortRef.current === controller) {
+          abortRef.current = null;
+        }
       });
-  }
+  }, [revokePreview]);
 
-  function cleanup() {
-    if (state.preview) {
-      URL.revokeObjectURL(state.preview);
-    }
-    setState({
-      isLoading: false,
-      result: null,
-      error: null,
-      preview: null,
-    });
-  }
+  useEffect(() => dispose, [dispose]);
 
   return {
     analyzeImage,

@@ -7,7 +7,7 @@ async function notReady(_: AnalysisRequest): Promise<AnalysisResult> {
 export const fraudRadarAnalyzer: Analyzer = {
   id: "fraud-radar",
   name: "FraudRadar",
-  description: "Correlates scam cases and repeated fraud patterns across reports.",
+  description: "Aggregates scam patterns across analyzed cases. Supabase-backed stats are queued for the dashboard phase.",
   supportedInputs: [],
   enabled: false,
   monetizationAngle: "Team dashboard and institutional intelligence subscriptions.",

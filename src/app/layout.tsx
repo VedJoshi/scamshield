@@ -24,6 +24,7 @@ export default function RootLayout({
             <Link href="/">Analyze</Link>
             <Link href="/history">History</Link>
             <Link href="/agents">Agents</Link>
+            <Link href="/dashboard">Dashboard</Link>
             <Link href="/api-docs">API</Link>
           </nav>
         </header>

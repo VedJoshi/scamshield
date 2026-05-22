@@ -6,7 +6,7 @@ import type { AnalysisInputType, AnalysisRequest, AnalysisResult } from "@/agent
 import { AudioUploader } from "@/features/analysis/components/AudioUploader";
 import { ImageUploader } from "@/features/analysis/components/ImageUploader";
 import { QrUploader } from "@/features/analysis/components/QrUploader";
-import type { AudioAnalysisResult } from "@/features/analysis/types";
+import type { AudioAnalysisResult, FormInputType, QueuedUpload } from "@/features/analysis/types";
 import type { ExampleInput } from "@/features/analysis/services/example-inputs";
 
 const inputTypeLabels: Record<AnalysisInputType, string> = {
@@ -19,8 +19,6 @@ const inputTypeLabels: Record<AnalysisInputType, string> = {
   qr_image: "QR Code",
   image_upload: "Screenshot",
 };
-
-type FormInputType = AnalysisInputType | "audio_upload";
 
 const allInputTypes: FormInputType[] = [
   "url",
@@ -54,6 +52,7 @@ interface AnalyzeFormProps {
   onImageError: (msg: string) => void;
   onAudioResult: (result: AudioAnalysisResult) => void;
   onAudioError: (msg: string) => void;
+  queuedUpload: QueuedUpload | null;
 }
 
 export function AnalyzeForm({
@@ -71,6 +70,7 @@ export function AnalyzeForm({
   onImageError,
   onAudioResult,
   onAudioError,
+  queuedUpload,
 }: AnalyzeFormProps) {
   const isUrl = inputType === "url";
   const isQrImage = inputType === "qr_image";
@@ -84,7 +84,7 @@ export function AnalyzeForm({
         <p className="eyebrow">Live MVP</p>
         <h2>Check a suspicious link or payment request before you pay.</h2>
         <p>
-          Select an input type - each routes to a specialized ScamShield agent.
+          Drop a screenshot or voice note anywhere - or pick an input type below.
         </p>
       </div>
 
@@ -138,6 +138,7 @@ export function AnalyzeForm({
               locale={locale}
               onResult={onAudioResult}
               onError={onAudioError}
+              queuedFile={queuedUpload?.kind === "audio" ? queuedUpload : null}
             />
           </>
         ) : isImageUpload ? (
@@ -149,6 +150,7 @@ export function AnalyzeForm({
               locale={locale}
               onResult={onImageResult}
               onError={onImageError}
+              queuedFile={queuedUpload?.kind === "image" ? queuedUpload : null}
             />
           </>
         ) : isQrImage ? (

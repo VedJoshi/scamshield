@@ -86,10 +86,16 @@ export const analysisResultSchema = z.object({
   shortReport: z.string().min(1),
 });
 
+export const savedCaseRequestSchema = z.object({
+  inputType: analysisInputTypeSchema,
+  rawInput: z.string().min(1).max(50000),
+  locale: z.enum(["vi-VN", "en-US"]),
+});
+
 export const savedCaseSchema = z.object({
   id: z.string().min(1),
   createdAt: z.string().min(1),
-  request: analysisRequestSchema,
+  request: savedCaseRequestSchema,
   result: analysisResultSchema,
 });
 

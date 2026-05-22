@@ -3,6 +3,7 @@ import { ZodError } from "zod";
 
 import { analyzeScamContent } from "@/features/analysis/services/analysis.service";
 import { analysisRequestSchema } from "@/features/analysis/schemas/analysis";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -26,6 +27,17 @@ function isProviderError(error: unknown): boolean {
 
 export async function POST(request: Request) {
   try {
+    const rateLimitResponse = checkRateLimit(request, {
+      keyPrefix: "analyze",
+      limit: 20,
+      windowMs: 60_000,
+      message: "Rate limit exceeded. Max 20 analyses per minute.",
+    });
+
+    if (rateLimitResponse) {
+      return rateLimitResponse;
+    }
+
     const body = await request.json();
     const parsed = analysisRequestSchema.parse(body);
     const result = await analyzeScamContent(parsed);
